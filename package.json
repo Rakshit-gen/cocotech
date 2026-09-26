@@ -1,0 +1,15 @@
+{
+  "name": "cocotech-material-atlas",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A four-page material research website for CocoTech.",
+  "scripts": {
+    "start": "python3 -m http.server 4173 --bind 127.0.0.1",
+    "test": "node tests/verify.cjs",
+    "screenshots": "node tests/inspect.cjs home acoustics energy vision",
+    "build": "python3 scripts/build.py"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}
