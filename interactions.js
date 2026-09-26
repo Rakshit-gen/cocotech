@@ -1,5 +1,6 @@
 import { research } from "./research.js";
 import { random } from "./materials.js";
+import { setupProcessMotion } from "./process-motion.js";
 const fiberPaths = Array.from({ length: 32 }, (_, i) => {
   const x = 115 + (i % 8) * 23,
     y = 43 + Math.floor(i / 8) * 34;
@@ -15,7 +16,7 @@ function illustration(kind, index, type) {
     (_, i) =>
       `<path d="m${130 + ((i * 47) % 145)} ${75 + ((i * 31) % 95)} 12 -4 7 9 -13 5Z" fill="${type === "energy" ? "#45483d" : "#a68b62"}"/>`,
   ).join("");
-  const fibers = `<g fill="none" stroke="#855333" stroke-width="2">${fiberPaths}</g>`;
+  const fibers = `<g data-part="fibers" fill="none" stroke="#855333" stroke-width="2">${fiberPaths}</g>`;
   const panel =
     '<path d="m120 95 120-44 66 39-118 45Z" fill="#b49b73" stroke="#855333"/><path d="m120 95 68 40v29l-68-43Z" fill="#a08961"/><path d="m188 135 118-45v29l-118 45Z" fill="#796446"/>';
   const drops =
@@ -27,61 +28,87 @@ function illustration(kind, index, type) {
     (_, i) =>
       `<circle cx="${133 + ((i * 41) % 150)}" cy="${58 + ((i * 29) % 110)}" r="${3 + (i % 4) * 2}" fill="#eeede6" stroke="#818475"/>`,
   ).join("");
+  const g = (name, markup) => `<g data-part="${name}">${markup}</g>`;
   const drawings = {
-    collect:
+    collect: g(
+      "material",
       type === "energy"
         ? smalls
         : shell +
-          '<path d="M124 91q75 67 173 0M132 96q64 86 155 7M141 111q60 70 133 7" fill="none" stroke="#c4aa7e"/>',
+            '<path d="M124 91q75 67 173 0M132 96q64 86 155 7M141 111q60 70 133 7" fill="none" stroke="#c4aa7e"/>',
+    ),
     clean:
-      (type === "energy" ? smalls : shell) +
-      drops +
+      g("material", type === "energy" ? smalls : shell) +
+      g("water", drops) +
       '<path d="M100 176h220" stroke="#68695e"/>',
     fiber: fibers,
     dry:
       fibers +
-      '<path d="M80 51q30-15 60 0M260 32q30-15 60 0M90 185q30-15 60 0" fill="none" stroke="#68695e" stroke-dasharray="5 5"/>',
+      g(
+        "heat",
+        '<path d="M80 51q30-15 60 0M260 32q30-15 60 0M90 185q30-15 60 0" fill="none" stroke="#68695e" stroke-dasharray="5 5"/>',
+      ),
     treat:
       '<path d="M95 70v110h230V70" fill="#d7d8ab" stroke="#262923"/>' +
       fibers +
       '<path d="M96 85q30-10 60 0t60 0t60 0t49 0" fill="none" stroke="#68695e"/>',
     cut:
-      smalls +
-      '<path d="m205 35 25 9-8 52-23-8Z" fill="#68695e"/><path d="m213 98-6 26" stroke="#262923" stroke-dasharray="3 3"/>',
+      g("material", smalls) +
+      g("blade", '<path d="m205 35 25 9-8 52-23-8Z" fill="#68695e"/>') +
+      '<path d="m213 98-6 26" stroke="#262923" stroke-dasharray="3 3"/>',
     mix:
       '<path d="M115 87q8 100 95 100t95-100Z" fill="#d7d8ab" stroke="#262923"/>' +
-      smalls +
-      '<path d="M207 34v107m-25-13 25 13 25-13" fill="none" stroke="#262923" stroke-width="6"/>',
+      g("material", smalls) +
+      g(
+        "mixer",
+        '<path d="M207 34v107m-25-13 25 13 25-13" fill="none" stroke="#262923" stroke-width="6"/>',
+      ),
     mould:
       '<path d="m96 96 147-55 86 49v64l-147 54-86-51Z" fill="none" stroke="#262923" stroke-width="2"/>' +
-      panel,
+      g("panel", panel),
     press:
-      panel +
-      '<path d="M97 46h227v19H97z" fill="#262923"/><path d="M210 15v25m-8-7 8 8 8-8M210 210v-31m-8 7 8-8 8 8" fill="none" stroke="#262923" stroke-width="2"/>',
-    cure: panel + heat,
+      g("panel", panel) +
+      g("platen", '<path d="M97 46h227v19H97z" fill="#262923"/>') +
+      '<path d="M210 15v25m-8-7 8 8 8-8M210 210v-31m-8 7 8-8 8 8" fill="none" stroke="#262923" stroke-width="2"/>',
+    cure: panel + g("heat", heat),
     finish:
       panel +
-      '<path d="m120 71 120-44 66 39-118 45Z" fill="#d7d8ab" stroke="#68695e" stroke-dasharray="3 3"/><path d="M100 46v93M324 40v90" fill="none" stroke="#68695e"/>',
+      g(
+        "fabric",
+        '<path d="m120 71 120-44 66 39-118 45Z" fill="#d7d8ab" stroke="#68695e" stroke-dasharray="3 3"/>',
+      ) +
+      '<path d="M100 46v93M324 40v90" fill="none" stroke="#68695e"/>',
     furnace:
-      '<path d="M111 47h200v131H111z" fill="none" stroke="#262923" stroke-width="2"/><path d="M126 61h170v69H126z" fill="#45483d"/>' +
-      heat +
+      '<path d="M111 47h200v131H111z" fill="none" stroke="#262923" stroke-width="2"/><path data-part="char" d="M126 61h170v69H126z" fill="#45483d"/>' +
+      g("heat", heat) +
       '<path d="M165 21v20m45-20v20m45-20v20" stroke="#855333"/>',
     sieve:
-      smalls +
-      '<path d="M105 110h210M105 115h210" stroke="#262923"/><path d="M105 116l50 53h112l48-53" fill="none" stroke="#68695e"/><path d="M146 110v7m25-7v7m25-7v7m25-7v7m25-7v7m25-7v7" stroke="#eeede6" stroke-width="4"/>',
+      g("material", smalls) +
+      g(
+        "screen",
+        '<path d="M105 110h210M105 115h210" stroke="#262923"/><path d="M105 116l50 53h112l48-53" fill="none" stroke="#68695e"/><path d="M146 110v7m25-7v7m25-7v7m25-7v7m25-7v7m25-7v7" stroke="#eeede6" stroke-width="4"/>',
+      ),
     activate:
       '<path d="M159 30v39l-55 103q-8 18 14 18h184q22 0 14-18L261 69V30" fill="#d7d8ab" stroke="#262923" stroke-width="2"/><path d="M145 30h130M134 129h152" stroke="#262923"/>' +
-      pore,
-    pores: '<path d="M113 44h194v145H113z" fill="#45483d"/>' + pore,
+      g("pores", pore),
+    pores: '<path d="M113 44h194v145H113z" fill="#45483d"/>' + g("pores", pore),
     electrode:
-      '<path d="m104 100 147-54 74 41-147 54Z" fill="#45483d"/><path d="m104 114 147-54 74 41-147 54Z" fill="none" stroke="#855333" stroke-width="3"/><path d="m104 128 147-54 74 41-147 54Z" fill="none" stroke="#68695e" stroke-width="2"/>',
+      g("coating", '<path d="m104 100 147-54 74 41-147 54Z" fill="#45483d"/>') +
+      g(
+        "collector",
+        '<path d="m104 114 147-54 74 41-147 54Z" fill="none" stroke="#855333" stroke-width="3"/><path d="m104 128 147-54 74 41-147 54Z" fill="none" stroke="#68695e" stroke-width="2"/>',
+      ),
     assemble:
-      '<path d="M114 60h42v118h-42zM183 60h42v118h-42zM252 60h42v118h-42z" fill="#45483d"/><path d="M170 50v137M239 50v137" stroke="#b49b73" stroke-width="5" stroke-dasharray="3 3"/><path d="M133 60V30h140v30" fill="none" stroke="#262923"/><text x="125" y="207" font-size="16" fill="#262923">+</text><text x="266" y="207" font-size="16" fill="#262923">−</text>',
+      g(
+        "stack",
+        '<path d="M114 60h42v118h-42z" fill="#45483d"/><path d="M183 60h42v118h-42z" fill="#45483d"/><path d="M252 60h42v118h-42z" fill="#45483d"/>',
+      ) +
+      '<path d="M170 50v137M239 50v137" stroke="#b49b73" stroke-width="5" stroke-dasharray="3 3"/><path d="M133 60V30h140v30" fill="none" stroke="#262923"/><text x="125" y="207" font-size="16" fill="#262923">+</text><text x="266" y="207" font-size="16" fill="#262923">−</text>',
     test:
       '<path d="M100 36h220v148H100z" fill="none" stroke="#262923" stroke-width="2"/><path d="M122 152h176M122 58v94" stroke="#68695e"/>' +
       (type === "acoustics"
-        ? '<path d="M132 107q12-62 25 0t25 0t25 0t25 0t25 0t25 0" fill="none" stroke="#855333" stroke-width="2"/>'
-        : '<path d="m135 134 35-58 35 58 35-58 35 58" fill="none" stroke="#855333" stroke-width="2"/>') +
+        ? '<path data-part="signal" d="M132 107q12-62 25 0t25 0t25 0t25 0t25 0t25 0" fill="none" stroke="#855333" stroke-width="2"/>'
+        : '<path data-part="signal" d="m135 134 35-58 35 58 35-58 35 58" fill="none" stroke="#855333" stroke-width="2"/>') +
       '<path d="M165 202h90M210 184v18" stroke="#262923"/>',
   };
   return `<svg viewBox="0 0 420 225" xmlns="http://www.w3.org/2000/svg">${common}<g>${drawings[kind] || fibers}</g><text x="385" y="24" text-anchor="end" fill="#68695e" font-size="9" font-family="monospace">${String(index + 1).padStart(2, "0")} / SCHEMATIC</text></svg>`;
@@ -92,6 +119,7 @@ export function setupResearch(type, root) {
   const console = root.querySelector("[data-process]");
   let stage = 0;
   const tabs = [...console.querySelectorAll("[data-step]")];
+  const motion = setupProcessMotion(console, () => data.stages[stage][2]);
   function choose(i, animate = true) {
     stage = i;
     tabs.forEach((tab, n) => {
@@ -117,12 +145,7 @@ export function setupResearch(type, root) {
     console
       .querySelectorAll(".process-progress span")
       .forEach((s, n) => s.classList.toggle("passed", n <= i));
-    if (animate) {
-      const pic = console.querySelector(".process-illustration");
-      pic.classList.remove("stamped");
-      void pic.offsetWidth;
-      pic.classList.add("stamped");
-    }
+    motion.changed();
     if (innerWidth <= 760)
       tabs[i].parentElement.scrollTo({
         left: tabs[i].offsetLeft - tabs[0].offsetLeft - 12,
@@ -152,7 +175,17 @@ export function setupResearch(type, root) {
     );
   }
   keyboard(tabs, choose);
-  choose(0, false);
+  const requestedStep = Number(
+    new URLSearchParams(location.search).get("step"),
+  );
+  choose(
+    Number.isInteger(requestedStep) &&
+      requestedStep >= 1 &&
+      requestedStep <= data.stages.length
+      ? requestedStep - 1
+      : 0,
+    false,
+  );
   const metricTabs = [...root.querySelectorAll("[data-metric]")];
   function metric(i) {
     const [name, title, desc, axis] = data.metrics[i];
@@ -186,6 +219,7 @@ export function setupResearch(type, root) {
     type,
   );
   return () => {
+    motion.cleanup();
     stopSimulation();
     media.removeEventListener("change", orientation);
   };
@@ -206,6 +240,14 @@ function setupSimulation(root, type) {
     w = 1,
     h = 1;
   let background = document.createElement("canvas");
+  const pulseButton = root.querySelector("[data-send-pulse]");
+  const pulseStatus = root.querySelector(".pulse-status");
+  let pulse = null,
+    pulseMode = false;
+  const pulseRunning = () => pulse?.running && !reduce.matches;
+  const announcePulse = (text) => {
+    if (pulseStatus) pulseStatus.textContent = text;
+  };
   const a = type === "acoustics";
   function base() {
     const d = Math.min(devicePixelRatio || 1, 2);
@@ -275,10 +317,19 @@ function setupSimulation(root, type) {
           const pos = x / w;
           const through = Math.max(0, Math.min(1, (pos - 0.38) / 0.33));
           const absorption = 0.25 + Math.sin(value * Math.PI) * 0.42;
-          const amp = (11 + ex * 7) * (1 - through * absorption);
-          const y =
-            center +
-            Math.sin(x / (18 - ex * 10) - time * 2.3 + line * 0.65) * amp;
+          const amp =
+            (pulseMode ? Math.min(32 + ex * 20, (h - 122) / 7) : 11 + ex * 7) *
+            (1 - through * absorption);
+          const pulseX = pulse ? pulse.progress * (w + 120) - 60 : -100;
+          const envelope = pulseMode
+            ? pulse
+              ? Math.exp(-Math.pow((x - pulseX) / 43, 2))
+              : 0
+            : 1;
+          const phase = pulseMode
+            ? (x - pulseX) / (18 - ex * 10)
+            : x / (18 - ex * 10) - time * 2.3 + line * 0.65;
+          const y = center + Math.sin(phase) * amp * envelope;
           x === 16 ? c.moveTo(x, y) : c.lineTo(x, y);
         }
         c.strokeStyle = line % 2 ? "#bca386" : "#d7d8ab";
@@ -315,11 +366,22 @@ function setupSimulation(root, type) {
     }
   }
   function tick(now) {
-    if (paused || !visible) {
+    if ((paused && !pulseRunning()) || !visible) {
       frame = 0;
       return;
     }
-    if (last) t += Math.min(now - last, 40) / 1000;
+    const elapsed = last ? Math.min(now - last, 40) : 0;
+    t += elapsed / 1000;
+    if (pulseRunning()) {
+      pulse.progress = Math.min(1, pulse.progress + elapsed / 2400);
+      if (pulse.progress >= 1) {
+        pulse = null;
+        root.dataset.pulseState = "complete";
+        announcePulse(
+          "Pulse passed through. Change the structure and send another.",
+        );
+      }
+    }
     last = now;
     draw(t);
     frame = requestAnimationFrame(tick);
@@ -327,9 +389,14 @@ function setupSimulation(root, type) {
   function play() {
     cancelAnimationFrame(frame);
     last = 0;
-    if (!paused && visible) frame = requestAnimationFrame(tick);
+    if ((!paused || pulseRunning()) && visible)
+      frame = requestAnimationFrame(tick);
     else draw(t);
-    button.textContent = paused ? "Play motion ▷" : "Pause motion Ⅱ";
+    button.textContent = pulseMode
+      ? "Show continuous waves ▷"
+      : paused
+        ? "Play motion ▷"
+        : "Pause motion Ⅱ";
     button.setAttribute("aria-pressed", String(paused));
   }
   function controls() {
@@ -356,11 +423,38 @@ function setupSimulation(root, type) {
   }
   structure.addEventListener("input", controls);
   excitation.addEventListener("input", controls);
+  if (pulseButton)
+    pulseButton.onclick = () => {
+      paused = true;
+      pulseMode = true;
+      pulse = { progress: reduce.matches ? 0.6 : 0, running: !reduce.matches };
+      root.dataset.pulseState = reduce.matches ? "still" : "sending";
+      pulseButton.textContent = "Send another pulse →";
+      announcePulse(
+        reduce.matches
+          ? "Still view: the pulse is inside the fibers. Motion is reduced."
+          : "A pulse is travelling through the fiber network.",
+      );
+      play();
+    };
   button.onclick = () => {
+    if (pulseMode) {
+      pulseMode = false;
+      pulse = null;
+      root.dataset.pulseState = "idle";
+      announcePulse("Send one pulse and follow it through the fibers.");
+    }
     paused = !paused;
     play();
   };
   const reduceChange = () => {
+    if (reduce.matches && pulseMode) {
+      pulse = { progress: 0.6, running: false };
+      root.dataset.pulseState = "still";
+      announcePulse(
+        "Still view: the pulse is inside the fibers. Motion is reduced.",
+      );
+    }
     paused = reduce.matches;
     play();
   };

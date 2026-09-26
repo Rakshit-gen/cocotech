@@ -24,8 +24,11 @@ Each URL works on a plain static server. Internal links use the browser View Tra
 ## Interactions and evidence
 
 - The home specimen supports pointer dragging, arrow-key rotation, layer separation and reset. The two model shortcuts lead directly to the live simulations.
-- Process explorers support clicks, previous/next buttons, arrow keys, Home and End. Mobile uses a horizontally scrollable stage selector.
-- Canvas models respond to both sliders, stop when offscreen, include pause/play, and start paused for reduced-motion preferences.
+- Process explorers support clicks, previous/next buttons, arrow keys, Home and End. Each step plays a short physical animation and has a replay control. Mobile uses a horizontally scrollable stage selector. A URL such as `acoustics.html?step=9#process` opens a specific step.
+- Canvas models respond to both sliders, stop when offscreen, include pause/play, and start paused for reduced-motion preferences. The sound model also sends a single travelling pulse; reduced motion uses a still snapshot.
+- Product specimens have a movable high-resolution texture lens, with pointer, touch and keyboard controls. It enlarges the illustration, not measured microscopy.
+- Home-page specimen links use a shared-element transition into the matching product hero, where supported.
+- Lifecycle selections trace the relevant connecting arc. Recovery remains dotted.
 - Evaluation tabs explain each measurement and its test conditions. No empty chart or reference selector is shown while validated numerical results are unavailable.
 - The collaboration dialog creates an editable brief and downloads the edited text. It does not submit anything, invent a contact address or imply an operational backend.
 - The illustrations are procedural schematics, not specimen photographs or microscopy results.
@@ -54,6 +57,8 @@ Browser checks cover all pages at widths of 360, 390, 768, 820, 1440 and 1920 pi
 - `materials.js`: responsive procedural specimen drawings.
 - `specimen-player.js`: cached texture layers, drag rotation and separation controls.
 - `interactions.js`: process diagrams, evaluation controls and simulations.
+- `process-motion.js`: short, cancellable manufacturing animations.
+- `magnifier.js`: cached detail texture and accessible inspection controls.
 - `vision.js`: vision page and lifecycle controls.
 - `styles.css`: shared visual system and responsive layouts.
 
@@ -64,3 +69,5 @@ Before a public commercial launch, replace the illustrative specimens with docum
 ## Deploy
 
 Run `python3 scripts/build.py` to produce the allowlisted `dist/` folder and `cocotech-deploy.zip`. See [DEPLOYMENT.md](DEPLOYMENT.md) for hosting settings, domains and live verification.
+
+Run `node tests/motion.cjs` for the five motion additions, including touch, reduced motion, animation completion and shared-element snapshot checks.

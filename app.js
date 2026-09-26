@@ -1,7 +1,8 @@
-import { setupMaterials } from "./materials.js";
+import { setupMaterials, drawMaterial } from "./materials.js";
 import { acousticContent, energyContent } from "./product-pages.js";
 import { setupResearch } from "./interactions.js";
 import { visionContent, setupVision } from "./vision.js";
+import { setupMagnifiers } from "./magnifier.js";
 const app = document.querySelector("#app");
 const mark = `<svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M29 6a17 17 0 1 0 0 28M26 13a9 9 0 1 0 0 14" stroke="currentColor" stroke-width="3.3"/><path d="m31 12 4-4m-3 12h6m-7 8 4 4" stroke="currentColor" stroke-width="1.5"/></svg>`;
 const arrow = '<span class="arrow" aria-hidden="true">↗</span>';
@@ -12,7 +13,11 @@ const titles = {
   vision: "Our Vision  /  CocoTech Material Atlas",
 };
 function currentPage() {
-  const path = location.pathname.replace(/\/$/, "").split("/").pop().replace(/\.html$/, "");
+  const path = location.pathname
+    .replace(/\/$/, "")
+    .split("/")
+    .pop()
+    .replace(/\.html$/, "");
   return path === "acoustics"
     ? "acoustics"
     : path === "energy"
@@ -124,9 +129,11 @@ function render({ focus = false } = {}) {
   app.innerHTML = header(page) + (pages[page] || home)() + footer();
   wireCommon();
   const offMaterials = setupMaterials(app);
+  const offMagnifiers = setupMagnifiers(app);
   const offPage = setupPage(page);
   cleanup = () => {
     offMaterials();
+    offMagnifiers();
     offPage();
   };
   if (focus) {
@@ -138,10 +145,33 @@ function render({ focus = false } = {}) {
 function setupPage(page) {
   return page === "vision" ? setupVision(app) : setupResearch(page, app);
 }
-function navigate(url, push = true) {
+let activeTransition = null;
+function navigate(url, push = true, origin = null) {
+  activeTransition?.skipTransition();
+  const target = new URL(url, location.href);
+  const material = origin?.querySelector("[data-material]")?.dataset.material;
+  const source = origin?.querySelector("[data-material]");
+  const transfer =
+    source &&
+    !target.hash &&
+    ["panel", "carbon"].includes(material) &&
+    document.startViewTransition &&
+    !matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (transfer) source.style.viewTransitionName = "travelling-specimen";
   const update = () => {
     if (push) history.pushState({}, "", url);
     render({ focus: true });
+    if (transfer) {
+      const destination = app.querySelector(
+        `.page-hero-art [data-material="${material}"]`,
+      );
+      if (destination) {
+        destination.style.viewTransitionName = "travelling-specimen";
+        // Painting is suspended during a view-transition callback. Draw directly
+        // rather than waiting for an animation frame before its snapshot.
+        drawMaterial(destination, material);
+      }
+    }
     window.scrollTo({ top: 0, behavior: "instant" });
     if (location.hash)
       document
@@ -153,9 +183,21 @@ function navigate(url, push = true) {
     !matchMedia("(prefers-reduced-motion: reduce)").matches
   ) {
     const transition = document.startViewTransition(update);
+    activeTransition = transition;
     // A second navigation can legitimately skip the first visual transition.
     // Its DOM update still runs; only the optional animation is cancelled.
     transition.ready.catch(() => {});
+    transition.finished
+      .finally(() => {
+        if (activeTransition !== transition) return;
+        activeTransition = null;
+        app
+          .querySelectorAll("[data-material]")
+          .forEach((canvas) =>
+            canvas.style.removeProperty("view-transition-name"),
+          );
+      })
+      .catch(() => {});
   } else update();
 }
 document.addEventListener("click", (e) => {
@@ -181,7 +223,7 @@ document.addEventListener("click", (e) => {
     url.pathname !== location.pathname
   ) {
     e.preventDefault();
-    navigate(url);
+    navigate(url, true, a.closest(".pathway"));
   }
 });
 window.addEventListener("popstate", () => navigate(location.href, false));

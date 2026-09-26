@@ -6,10 +6,15 @@ export function random(seed = 17) {
     return (seed - 1) / 2147483646;
   };
 }
-export function drawMaterial(canvas, mode = "ring", highlight = "both") {
-  const rect = canvas.getBoundingClientRect();
+export function drawMaterial(
+  canvas,
+  mode = "ring",
+  highlight = "both",
+  options = {},
+) {
+  const rect = options.bounds || canvas.getBoundingClientRect();
   if (!rect.width) return;
-  const dpr = Math.min(devicePixelRatio || 1, 2);
+  const dpr = options.resolution || Math.min(devicePixelRatio || 1, 2);
   canvas.width = Math.round(rect.width * dpr);
   canvas.height = Math.round(rect.height * dpr);
   const c = canvas.getContext("2d");

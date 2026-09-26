@@ -9,6 +9,7 @@ FILES = [
     "index.html", "acoustics.html", "energy.html", "vision.html", "404.html",
     "styles.css", "app.js", "materials.js", "specimen-player.js",
     "interactions.js", "product-pages.js", "research.js", "vision.js",
+    "process-motion.js", "magnifier.js",
     "_headers", "_redirects", "robots.txt",
     "assets/favicon.svg", "assets/manrope.ttf", "assets/manrope-bold.ttf",
     "assets/plex-mono.ttf", "assets/manrope-LICENSE.txt", "assets/plex-mono-LICENSE.txt",

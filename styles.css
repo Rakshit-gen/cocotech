@@ -2071,3 +2071,206 @@ button {
   background: var(--paper);
   color: var(--ink);
 }
+
+/* Research interactions: short physical actions, with static reduced-motion states. */
+.process-illustration [data-part],
+.process-illustration [data-part] > * {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.process-illustration [data-part="panel"] {
+  transform-origin: center bottom;
+}
+.process-illustration [data-part="mixer"] {
+  transform-origin: center top;
+}
+.process-animation-tools {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin: 0 0 20px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.process-animation-tools > .mono {
+  font-size: 8px;
+  color: var(--muted);
+}
+.process-animation-tools button {
+  background: transparent;
+  border: 1px solid var(--line);
+  font: 10px Plex;
+  padding: 9px 12px;
+  min-height: 40px;
+}
+.process-animation-tools button:hover:enabled {
+  background: var(--accent);
+}
+.page-hero-art {
+  overflow: hidden;
+}
+.inspection-controls {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 45px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  z-index: 3;
+}
+.inspection-controls button {
+  min-height: 40px;
+  flex-shrink: 0;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  font: 10px Plex;
+  padding: 9px 12px;
+}
+.inspection-controls button:hover,
+.inspection-controls button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper);
+}
+.inspect-hint {
+  font: 8px/1.7 Plex;
+  color: var(--muted);
+  max-width: 205px;
+  background: #eeede6d9;
+  padding: 3px 5px;
+}
+.texture-lens {
+  position: absolute;
+  width: 172px;
+  height: 172px;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 2;
+  box-shadow: 0 8px 22px #26292322;
+  background: var(--paper);
+}
+.texture-lens canvas {
+  width: 100%;
+  height: 100%;
+}
+.texture-lens span {
+  position: absolute;
+  bottom: 15px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 7px;
+  background: #eeede6dd;
+}
+.page-hero-art.inspecting {
+  cursor: crosshair;
+  touch-action: none;
+}
+.simulation-controls .pulse-button {
+  background: var(--accent);
+  color: var(--ink);
+  border-color: var(--accent);
+}
+.simulation-controls .pulse-button:hover {
+  background: var(--paper);
+}
+.simulation-controls .pulse-status {
+  font: 10px/1.65 Plex;
+  margin: 0;
+  color: var(--accent);
+  min-height: 50px;
+}
+.cycle-trace {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+::view-transition-group(travelling-specimen) {
+  animation-duration: 650ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+::view-transition-old(travelling-specimen),
+::view-transition-new(travelling-specimen) {
+  mix-blend-mode: normal;
+  height: 100%;
+  object-fit: contain;
+}
+@media (max-width: 1050px) {
+  .inspection-controls {
+    gap: 8px;
+  }
+  .inspect-hint {
+    font-size: 7px;
+  }
+  .simulation-stage {
+    align-self: stretch;
+    height: auto;
+    min-height: 360px;
+  }
+}
+@media (max-width: 760px) {
+  .inspection-controls button {
+    min-height: 44px;
+    font-size: 9px;
+  }
+  .texture-lens {
+    width: 142px;
+    height: 142px;
+  }
+  .inspection-controls {
+    bottom: 44px;
+    left: 12px;
+    right: 12px;
+  }
+  .process-animation-tools button {
+    min-height: 44px;
+    font-size: 9px;
+  }
+  .simulation-stage {
+    height: 300px;
+    min-height: 300px;
+  }
+  .simulation-controls .pulse-status {
+    min-height: 34px;
+  }
+  .simulation-controls .pulse-button {
+    min-height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(travelling-specimen) {
+    animation: none !important;
+  }
+}
+
+.simulation-stage {
+  height: auto;
+  min-height: 360px;
+  align-self: stretch;
+}
+.simulation-stage > canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.simulation-controls {
+  gap: 16px;
+  padding: 26px;
+}
+@media (max-width: 760px) {
+  .simulation-stage {
+    height: 300px;
+    min-height: 300px;
+  }
+  .simulation-controls {
+    padding: 23px;
+    gap: 20px;
+  }
+}
